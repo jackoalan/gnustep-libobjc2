@@ -72,6 +72,27 @@ __objc_block_trampoline_sret:
 	ldr r1, [pc, #-16]         // Load the block pointer over self
 	ldr pc, [pc, #-24]         // Jump to the block function
 __objc_block_trampoline_end_sret:
+#elif __ppc__
+#define _LANGUAGE_ASSEMBLY 1
+#include <ogc/machine/asm.h>
+__objc_block_trampoline:
+	mr    r4, r3                 // Move self over _cmd
+    mflr  r0
+    bl    0
+    mflr  r3
+    mtlr  r0
+	addi  r3, r3, -32               // Load the block pointer over self
+	b     -40                   // Jump to the block function
+__objc_block_trampoline_end:
+__objc_block_trampoline_sret:
+	mr    r5, r4                 // Move self over _cmd
+    mflr  r0
+    bl    0
+    mflr  r4
+    mtlr  r0
+	addi  r4, r4, -32               // Load the block pointer over self
+	b     -40                   // Jump to the block function
+__objc_block_trampoline_end_sret:
 #else
 #warning imp_implementationWithBlock() not implemented for your architecture
 __objc_block_trampoline:

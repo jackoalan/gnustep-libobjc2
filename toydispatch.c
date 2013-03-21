@@ -1,6 +1,34 @@
+#if WIISTEP
+#if WIISTEP_RVL_SDK
+
+#elif WIISTEP_LIBOGC
+
+// Use libogc's LWP to run GCD
+#include <ogc/lwp.h>
+#include <ogc/mutex.h>
+#include <ogc/cond.h>
+
+#define pthread_mutex_t mutex_t
+#define pthread_cond_t cond_t
+#define pthread_t lwp_t
+
+#define sched_yield LWP_YieldThread
+#define pthread_mutex_lock(m) LWP_MutexLock(*m)
+#define pthread_cond_signal(c) LWP_CondSignal(*c)
+#define pthread_mutex_unlock(m) LWP_MutexUnlock(*m)
+#define pthread_cond_wait(c,m) LWP_CondWait(*c,*m)
+#define pthread_cond_destroy(c) LWP_CondDestroy(*c)
+#define pthread_mutex_destroy(m) LWP_MutexDestroy(*m)
+#define pthread_cond_init(c,x) LWP_CondInit(c)
+#define pthread_mutex_init(m,x) LWP_MutexInit(m,0)
+#define pthread_create(othread,attr,routine,arg) LWP_CreateThread(othread,routine,arg,NULL,0,0)
+#define pthread_detach(thread)
+
+#endif
+#else
 #include <pthread.h>
+#endif
 #include <stdlib.h>
-#define __TOY_DISPATCH__
 #include "objc/toydispatch.h"
 
 /**

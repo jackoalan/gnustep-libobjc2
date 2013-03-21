@@ -63,7 +63,7 @@ static int increment24(int *ref)
 	// FIXME: We should gracefully handle refcount overflow, but for now we
 	// just give up
 	assert(val < BLOCK_REFCOUNT_MASK);
-	if (!__sync_bool_compare_and_swap(ref, old, old+1))
+	if (!__sync_bool_compare_and_swap_int(ref, old, old+1))
 	{
 		return increment24(ref);
 	}
@@ -77,7 +77,7 @@ static int decrement24(int *ref)
 	// FIXME: We should gracefully handle refcount overflow, but for now we
 	// just give up
 	assert(val > 0);
-	if (!__sync_bool_compare_and_swap(ref, old, old-1))
+	if (!__sync_bool_compare_and_swap_int(ref, old, old-1))
 	{
 		return decrement24(ref);
 	}
@@ -95,7 +95,7 @@ static int decrement24(int *ref)
 __attribute__((noinline))
 static int cas(void *ptr, void *old, void *new)
 {
-	return __sync_bool_compare_and_swap((void**)ptr, old, new);
+	return __sync_bool_compare_and_swap_ptr((void**)ptr, old, new);
 }
 #define __sync_bool_compare_and_swap cas
 #endif
@@ -143,7 +143,7 @@ void _Block_object_assign(void *destAddr, const void *object, const int flags)
 				// it.  If the forwarding pointer in src has changed, then we
 				// recover - clean up and then return the structure that the
 				// other thread created.
-				if (!__sync_bool_compare_and_swap(&src->forwarding, src, *dst))
+				if (!__sync_bool_compare_and_swap_ptr(&src->forwarding, src, *dst))
 				{
 					if((size_t)src->size >= sizeof(struct block_byref_obj))
 					{

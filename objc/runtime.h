@@ -35,6 +35,9 @@ extern "C" {
 #include <stddef.h>
 #include <sys/types.h>
 #include "Availability.h"
+#if WIISTEP
+#include "ppc-atomic.h"
+#endif
 
 // Undo GNUstep substitutions
 #ifdef class_setVersion
@@ -127,7 +130,7 @@ typedef signed char BOOL;
 #		ifdef __vxwords
 typedef  int BOOL;
 #		else
-typedef unsigned char BOOL;
+//typedef unsigned char BOOL;
 #		endif
 #	endif
 

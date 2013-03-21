@@ -347,7 +347,7 @@ static const char *property_getTypeEncoding(objc_property_t property)
 	buffer[0] = 0;
 	memcpy(buffer+1, name, typeSize);
 	buffer[typeSize+1] = 0;
-	if (!__sync_bool_compare_and_swap(&(property->getter_types), name, buffer))
+	if (!__sync_bool_compare_and_swap_ptr(&(property->getter_types), name, buffer))
 	{
 		free(buffer);
 	}
@@ -477,7 +477,7 @@ PRIVATE const char *constructPropertyAttributes(objc_property_t property,
 	*insert = '\0';
 	// If another thread installed the encoding string while we were computing
 	// it, then discard the one that we created and return theirs.
-	if (!__sync_bool_compare_and_swap(&(property->name), name, (char*)encoding))
+	if (!__sync_bool_compare_and_swap_ptr(&(property->name), name, (char*)encoding))
 	{
 		free(encoding);
 		return property->name + 2;

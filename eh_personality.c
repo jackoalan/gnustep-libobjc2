@@ -528,7 +528,7 @@ struct thread_data
 // structure.  This will leak memory if we terminate any threads with
 // exceptions in-flight.
 #ifdef NO_PTHREADS
-static __thread struct thread_data thread_data;
+static __thread struct thread_data td;
 #else
 void clean_tls(void *td)
 {

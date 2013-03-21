@@ -5,7 +5,7 @@
 #include <assert.h>
 #include <ctype.h>
 #include <unistd.h>
-#include <sys/mman.h>
+//#include <sys/mman.h>
 #include "objc/runtime.h"
 #include "objc/blocks_runtime.h"
 #include "blocks_runtime.h"
@@ -54,8 +54,8 @@ static struct wx_buffer alloc_buffer(size_t size)
 		int fd = mkstemp(tmpPattern);
 		unlink(tmpPattern);
 		ftruncate(fd, PAGE_SIZE);
-		void *w = mmap(NULL, PAGE_SIZE, PROT_WRITE, MAP_SHARED, fd, 0);
-		executeBuffer = mmap(NULL, PAGE_SIZE, PROT_READ|PROT_EXEC, MAP_SHARED, fd, 0);
+		void *w = malloc(PAGE_SIZE);
+        executeBuffer = w;
 		*((void**)w) = writeBuffer;
 		writeBuffer = w;
 		offset = sizeof(void*);

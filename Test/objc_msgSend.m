@@ -5,6 +5,60 @@
 #include <stdarg.h>
 #include "objc/runtime.h"
 
+#include <gccore.h>
+#include <unistd.h>
+
+#define SLEEP() sleep(1)
+
+static void
+wii_init ()
+{
+	
+	void *xfb = NULL;
+	GXRModeObj *rmode = NULL;
+	
+	// Initialise the video system
+	VIDEO_Init();
+	
+	// This function initialises the attached controllers
+	//WPAD_Init();
+	
+	// Obtain the preferred video mode from the system
+	// This will correspond to the settings in the Wii menu
+	rmode = VIDEO_GetPreferredMode(NULL);
+	
+	// Allocate memory for the display in the uncached region
+	xfb = MEM_K0_TO_K1(SYS_AllocateFramebuffer(rmode));
+	
+	// Initialise the console, required for printf
+	console_init(xfb,20,20,rmode->fbWidth,rmode->xfbHeight,rmode->fbWidth*VI_DISPLAY_PIX_SZ);
+	
+	// Set up the video registers with the chosen mode
+	VIDEO_Configure(rmode);
+	
+	// Tell the video hardware where our display memory is
+	VIDEO_SetNextFramebuffer(xfb);
+	
+	// Make the display visible
+	VIDEO_SetBlack(FALSE);
+	
+	// Flush the video register changes to the hardware
+	VIDEO_Flush();
+	
+	// Wait for Video setup to complete
+	VIDEO_WaitVSync();
+	if(rmode->viTVMode&VI_NON_INTERLACE) VIDEO_WaitVSync();
+	
+	
+	// The console understands VT terminal escape codes
+	// This positions the cursor on row 2, column 0
+	// we can use variables for this with format codes too
+	// e.g. printf ("\x1b[%d;%dH", row, column );
+	printf("\x1b[2;0H");
+	
+}
+
+//#undef assert
 //#define assert(x) if (!(x)) { printf("Failed %d\n", __LINE__); }
 
 id objc_msgSend(id, SEL, ...);
@@ -14,7 +68,7 @@ typedef struct { int a,b,c,d,e; } s;
 - (int)izero;
 - (float)fzero;
 - (double)dzero;
-- (long double)ldzero;
+//- (long double)ldzero;
 @end
 
 Class TestCls;
@@ -60,7 +114,8 @@ __attribute__((objc_root_class))
 
 	vasprintf(&s, str, ap);
 	va_end(ap);
-	//fprintf(stderr, "String: '%s'\n", s);
+	printf("String: '%s'\n", s);
+	sleep(5);
 	assert(strcmp(s, "Format string 42 42.000000\n") ==0);
 }
 + (void)initialize
@@ -70,10 +125,27 @@ __attribute__((objc_root_class))
 }
 + nothing { return 0; }
 @end
+#define BENCHMARK 1
 int main(void)
 {
+	void* mem1_arena_at_init = SYS_GetArena1Lo();
+	wii_init();
+	size_t mem1_arena_diff_after_wii_init = SYS_GetArena1Lo()-mem1_arena_at_init;
+	printf("Branching to load routine... Platform Overhead: %u\n", mem1_arena_diff_after_wii_init);
+	SLEEP();
+	__asm__ __volatile__ ("bl .objc_load_function");
+	size_t mem1_arena_diff_after_objc_init = SYS_GetArena1Lo()-mem1_arena_at_init;
+	DCFlushRange(mem1_arena_at_init, ((mem1_arena_diff_after_objc_init>>5)<<5)+32);
+	printf("Obj-C on Wii initialised... Runtime Overhead: %u\n", mem1_arena_diff_after_objc_init-mem1_arena_diff_after_wii_init);
+	SLEEP();
+	//id fake = nil;
+	//id something = objc_msgSend(fake, @selector(printf:));
+	//printf("Return val: %x\n", something);
 	TestCls = objc_getClass("Test");
 	int exceptionThrown = 0;
+	printf("ABOUT TO ELLO\n");
+	[TestCls printf:"ELLO!\n"];
+	printf("DID IT ELLO?\n");
 	@try {
 		objc_msgSend(TestCls, @selector(foo));
 	} @catch (id e)
@@ -82,6 +154,7 @@ int main(void)
 		exceptionThrown = 1;
 	}
 	assert(exceptionThrown && "An exception was thrown");
+	/*
 	assert((id)0x42 == objc_msgSend(TestCls, @selector(foo)));
 	objc_msgSend(TestCls, @selector(nothing));
 	objc_msgSend(TestCls, @selector(missing));
@@ -112,7 +185,7 @@ int main(void)
 	Fake *f = nil;
 	assert(0 == [f izero]);
 	assert(0 == [f dzero]);
-	assert(0 == [f ldzero]);
+	//assert(0 == [f ldzero]);
 	assert(0 == [f fzero]);
 #ifdef BENCHMARK
 	clock_t c1, c2;
@@ -142,5 +215,8 @@ int main(void)
 	printf("Direct IMP call took %f seconds. \n", 
 		((double)c2 - (double)c1) / (double)CLOCKS_PER_SEC);
 #endif
+	 */
+	printf("Finished\n");
+	sleep(5);
 	return 0;
 }
