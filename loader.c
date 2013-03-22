@@ -106,6 +106,7 @@ void __objc_exec_class(struct objc_module_abi_8 *module)
 		objc_init_statics(*(statics++));
 	}
 
+
 	// Load categories and statics that were deferred.
 	objc_load_buffered_categories();
 	objc_init_buffered_statics();

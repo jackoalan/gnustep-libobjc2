@@ -129,6 +129,7 @@ PRIVATE void class_table_insert(Class class)
 PRIVATE Class class_table_get_safe(const char *class_name)
 {
 	if (NULL == class_name) { return Nil; }
+	printf("GOTHERR %s\n", class_name);sleep(1);
 	return class_table_internal_table_get(class_table, class_name);
 }
 

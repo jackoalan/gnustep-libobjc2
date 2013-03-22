@@ -277,6 +277,7 @@ static inline void add_selector_to_table(SEL aSel, int32_t uid, uint32_t idx)
 	typeList->next = 0;
 	// Store the name.
 	SparseArrayInsert(selector_list, idx, typeList);
+	void* verify = SparseArrayLookup(selector_list, idx);
 	// Store the selector.
 	selector_insert(sel_table, aSel);
 	// Set the selector's name to the uid.
