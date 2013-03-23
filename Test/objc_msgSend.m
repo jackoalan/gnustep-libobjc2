@@ -108,11 +108,11 @@ __attribute__((objc_root_class))
 + (void)printf: (const char*)str, ...
 {
 	va_list ap;
-	char *s;
+	char s[256];
 
 	va_start(ap, str);
 
-	vasprintf(&s, str, ap);
+	vsnprintf(s, 256, str, ap);
 	va_end(ap);
 	printf("String: '%s'\n", s);
 	sleep(5);
@@ -121,11 +121,24 @@ __attribute__((objc_root_class))
 + (void)initialize
 {
 	[self printf: "Format %s %d %f%c", "string", 42, 42.0, '\n'];
+	//[self printf:"Testing %d", 1];
 	@throw self;
 }
 + nothing { return 0; }
 @end
 #define BENCHMARK 1
+extern void(*__CTOR_END__)(void);
+static void va_test(const char* str, ...) {
+	va_list ap;
+	char s[256];
+	
+	va_start(ap, str);
+	
+	vsnprintf(s, 256, str, ap);
+	va_end(ap);
+	printf("VAT: '%s'\n", s);
+	sleep(5);
+}
 int main(void)
 {
 	void* mem1_arena_at_init = SYS_GetArena1Lo();
@@ -133,7 +146,33 @@ int main(void)
 	size_t mem1_arena_diff_after_wii_init = SYS_GetArena1Lo()-mem1_arena_at_init;
 	printf("Branching to load routine... Platform Overhead: %u\n", mem1_arena_diff_after_wii_init);
 	SLEEP();
-	__asm__ __volatile__ ("bl .objc_load_function");
+	//va_test("Testing %d, %d, %d", 1, 2, 3);
+	
+	// The Wii doesn't call this implicitly
+	// (also do it in forward order unlike GCC)
+	//__asm__ __volatile__ ("bl __do_global_ctors_aux");
+	//__asm__ __volatile__ ("bl __init");
+	//void(*CTOR)(void) = __CTOR_END__ - 4;
+	const void* CTOR = (&__CTOR_END__)-1;
+	//printf("CTOR 0x%x\n", CTOR);sleep(2);
+	while (*(const uint32_t*)CTOR != 0xffffffff)
+		CTOR -= 4;
+	CTOR += 4;
+	//printf("START CTOR 0x%x 0x%x\n", CTOR, (&__CTOR_END__));sleep(2);
+	while (CTOR != (&__CTOR_END__)) {
+		void(*CTOR_FPTR)(void) = ((void(*)(void))(*(const uint32_t*)CTOR));
+		//printf("RUNNING CTOR 0x%x -> 0x%x\n", CTOR, CTOR_FPTR);sleep(2);
+		CTOR_FPTR();
+		/*
+		__asm__ __volatile__ ("bl %[ptr]"
+							  : 
+							  : [ptr]"r"(CTOR)
+							  : "memory");
+		 */
+		CTOR += 4;
+	}
+
+
 	size_t mem1_arena_diff_after_objc_init = SYS_GetArena1Lo()-mem1_arena_at_init;
 	DCFlushRange(mem1_arena_at_init, ((mem1_arena_diff_after_objc_init>>5)<<5)+32);
 	printf("Obj-C on Wii initialised... Runtime Overhead: %u\n", mem1_arena_diff_after_objc_init-mem1_arena_diff_after_wii_init);
@@ -143,16 +182,19 @@ int main(void)
 	//printf("Return val: %x\n", something);
 	TestCls = objc_getClass("Test");
 	int exceptionThrown = 0;
-	printf("ABOUT TO ELLO\n");
-	[TestCls printf:"ELLO!\n"];
-	printf("DID IT ELLO?\n");
+	//printf("ABOUT TO ELLO\n");
+	//[TestCls printf:"ELLO!\n"];
+	//printf("DID IT ELLO?\n");
 	@try {
+		printf("About to send\n");sleep(1);
 		objc_msgSend(TestCls, @selector(foo));
 	} @catch (id e)
 	{
+		printf("Caught Exception\n");sleep(1);
 		assert((TestCls == e) && "Exceptions propagate out of +initialize");
 		exceptionThrown = 1;
 	}
+	printf("Done\n");sleep(1);
 	assert(exceptionThrown && "An exception was thrown");
 	/*
 	assert((id)0x42 == objc_msgSend(TestCls, @selector(foo)));

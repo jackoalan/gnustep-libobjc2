@@ -37,6 +37,7 @@ int __objc_runtime_threads_alive = 1;			/* !T:MUTEX */
 
 void __objc_exec_class(struct objc_module_abi_8 *module)
 {
+	//printf("RUNNING LOADER\n");sleep(2);
 	static BOOL first_run = YES;
 
 	// Check that this module uses an ABI version that we recognise.  
@@ -91,6 +92,7 @@ void __objc_exec_class(struct objc_module_abi_8 *module)
 	// Load the classes from this module
 	for (unsigned short i=0 ; i<symbols->class_count ; i++)
 	{
+		//printf("GOTIT %u/%u [%s]\n", i+1, symbols->class_count, ((struct objc_class*)(symbols->definitions[defs]))->name);sleep(1);
 		objc_load_class(symbols->definitions[defs++]);
 	}
 	unsigned int category_start = defs;

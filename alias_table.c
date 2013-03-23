@@ -73,6 +73,7 @@ PRIVATE void init_alias_table(void)
 
 static Alias alias_table_get_safe(const char *alias_name)
 {
+	//printf("About to get an alias named %s\n", alias_name);sleep(1);
 	return alias_table_internal_table_get(alias_table, alias_name);
 }
 
@@ -85,6 +86,7 @@ Class alias_getClass(const char *alias_name)
 	}
 
 	Alias alias = alias_table_get_safe(alias_name);
+	//printf("GOT ALIAS NAMED %s\n", alias_name);sleep(1);
 
 	if (NULL == alias.name)
 	{

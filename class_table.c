@@ -129,7 +129,6 @@ PRIVATE void class_table_insert(Class class)
 PRIVATE Class class_table_get_safe(const char *class_name)
 {
 	if (NULL == class_name) { return Nil; }
-	printf("GOTHERR %s\n", class_name);sleep(1);
 	return class_table_internal_table_get(class_table, class_name);
 }
 
@@ -421,7 +420,7 @@ PRIVATE void objc_load_class(struct objc_class *class)
 		class->isa->super_class = class;
 	}
 
-	if (class->protocols)
+	if (strcmp("Protocol", class->name) && strcmp("Protocol2", class->name) && class->protocols)
 	{
 		objc_init_protocols(class->protocols);
 	}
@@ -498,7 +497,9 @@ Class class_getSuperclass(Class cls)
 
 id objc_getClass(const char *name)
 {
+	//printf("About to lookup %s\n", name);sleep(1);
 	id class = (id)class_table_get_safe(name);
+	//printf("GOTHERE 0x%x\n", class);sleep(1);
 
 	if (nil != class) { return class; }
 

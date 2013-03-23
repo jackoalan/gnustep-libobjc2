@@ -34,6 +34,7 @@ EXEC_PROGRAM(llvm-config
 	ARGS --version
 	OUTPUT_VARIABLE LLVM_VER)
 
+set(LLVM_VER "3.3")
 string(REGEX REPLACE "([0-9]*).([0-9]*).*" "-DLLVM_MAJOR=\\1 -DLLVM_MINOR=\\2" LLVM_VERSION "${LLVM_VER}")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${LLVM_VERSION} -fno-rtti")

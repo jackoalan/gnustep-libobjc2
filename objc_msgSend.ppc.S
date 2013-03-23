@@ -33,7 +33,7 @@
 
 // Simplified string logger
 .macro LOGst string, arg, time
-	LOGStr \string, \arg, \time, r16, r17, r18, r19, r20, r21
+	//LOGStr \string, \arg, \time, r16, r17, r18, r19, r20, r21
 .endm
 
 .macro MSGSEND receiver, sel
@@ -41,7 +41,7 @@
 	.cfi_startproc
 
 	// Welcome message
-	LOGSt WelcomeStr, 0, 2
+	LOGSt WelcomeStr, 0, 1
 
 
 	cmplwi \receiver, 0
@@ -57,7 +57,7 @@
 	beq    1f
 
 	// Decided to use small int class
-	LOGSt SmallIntDbgStr, 0, 2
+	LOGSt SmallIntDbgStr, 0, 1
 
 	lis    r11, LSmallIntClass@ha
 	lwz    r11, LSmallIntClass@l(r11)              // Small Int class -> r4 if this is a small int
@@ -65,12 +65,12 @@
 	b      2f
 1:
 	// Decided to use `isa` pointer class of receiver
-	LOGSt IsaDbgStr, 0, 2
+	LOGSt IsaDbgStr, 0, 1
 	mr     r11, \receiver //???                  // Load class to r4 if not a small int
-	LOGSt IsaPtrStr, r11, 2
+	LOGSt IsaPtrStr, r11, 1
 2:
 	lwz    r11, DTABLE_OFFSET(r11)  //???         // Dtable -> r4
-	LOGSt DTablePtrStr, r11, 2
+	LOGSt DTablePtrStr, r11, 1
 
 	lis    r12, LUninstalledDtable@ha          // &uninstalled_dtable -> r5
 	lwz    r12, LUninstalledDtable@l(r12)
@@ -127,19 +127,23 @@
 	li    r4, 0
 	blr                                   // Return to caller
 5:                                        // Slow lookup
-	LOGSt SlowLookupDbgStr, 0, 2
+	LOGSt SlowLookupDbgStr, 0, 1
 	//push   {r0-r4, lr}                    // Save anything that will be clobbered by the call
 	//.save  {r0-r4, lr}
 	mflr   r0			                   // Get Link register
 	stw    r0,  4(r1)                     // Save Link register
-	stwu   r1,  -24(r1)                    // Save Back chain and push stack frame
-	.cfi_def_cfa_offset 24
+	stwu   r1,  -40(r1)                    // Save Back chain and push stack frame
+	.cfi_def_cfa_offset 40
 	.cfi_offset lr, 4
 	stw    r3,  4(r1)                      // Save first four parameters (r3,r4,r5,r6)
 	stw    r4,  8(r1)
 	stw    r5,  12(r1)
 	stw    r6,  16(r1)
-	stw    \receiver, 20(r1)               // Additionally store macro-resolved receiver register
+	stw    r7,  20(r1)
+	stw    r8,  24(r1)
+	stw    r9,  28(r1)
+	stw    r10,  32(r1)
+	stw    \receiver, 36(r1)               // Additionally store macro-resolved receiver register
 
 
 	//push   {\receiver}                    // &self, _cmd in arguments
@@ -147,7 +151,7 @@
 	mr     r4, \sel
 
 	bl     slowMsgLookup             // This is the only place where the CFI directives have to be accurate...
-	LOGSt  SlowLookupFinishStr, r3, 2
+	LOGSt  SlowLookupFinishStr, r3, 1
 
 
 	//pop    {r5}                           // restore (modified) self to r5
@@ -158,8 +162,12 @@
 	lwz    r4,  8(r1)
 	lwz    r5,  12(r1)
 	lwz    r6,  16(r1)
-	lwz    \receiver, 20(r1)               // Additionally load macro-resolved receiver register
-	addi   r1, r1, 24                      // Pop frame from stack
+	lwz    r7,  20(r1)
+	lwz    r8,  24(r1)
+	lwz    r9,  28(r1)
+	lwz    r10,  32(r1)
+	lwz    \receiver, 36(r1)               // Additionally load macro-resolved receiver register
+	addi   r1, r1, 40                      // Pop frame from stack
 	lwz    r0,  4(r1)                     // Get saved Link register
 	mtlr   r0                              // Restore Link register
 	b      3b
