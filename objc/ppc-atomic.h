@@ -102,7 +102,7 @@ static inline void *OPA_cas_ptr_by_llsc(OPA_ptr_t *ptr, void *oldv, void *newv)
 }
 
 #define __sync_bool_compare_and_swap_int(ref,test,repl) (test == OPA_cas_int_by_llsc((OPA_int_t*)ref,test,repl))
-#define __sync_bool_compare_and_swap_ptr(ref,test,repl) (test == OPA_cas_ptr_by_llsc((OPA_ptr_t*)ref,test,repl))
+#define __sync_bool_compare_and_swap_ptr(ref,test,repl) (test == OPA_cas_ptr_by_llsc((OPA_ptr_t*)ref,(void*)test,(void*)repl))
 #define __sync_add_and_fetch(ref,addval) OPA_add_int_and_fetch_by_llsc((OPA_int_t*)ref,addval)
 #define __sync_sub_and_fetch(ref,subval) OPA_sub_int_and_fetch_by_llsc((OPA_int_t*)ref,subval)
 
