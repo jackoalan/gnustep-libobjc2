@@ -31,10 +31,10 @@ static inline int OPA_LL_int(OPA_int_t *ptr)
 static inline int OPA_SC_int(OPA_int_t *ptr, int val)
 {
     int ret = 1;
-    __asm__ __volatile__ ("stwcx. %[val],0,%[ptr];\n"
-                          "beq 1f;\n"
-                          "li %[ret], 0;\n"
-                          "1: ;\n"
+    __asm__ __volatile__ ("stwcx. %[val],0,%[ptr]\n"
+                          "\tbeq 1f\n"
+                          "\tli %[ret], 0\n"
+                          "1:"
                           : [ret] "=r" (ret)
                           : [ptr] "r" (&ptr->v), [val] "r" (val), "0" (ret)
                           : "cc", "memory");
@@ -82,10 +82,10 @@ static inline void *OPA_LL_ptr(OPA_ptr_t *ptr)
 static inline int OPA_SC_ptr(OPA_ptr_t *ptr, void *val)
 {
     int ret = 1;
-    __asm__ __volatile__ ("stwcx. %[val],0,%[ptr];\n"
-                          "beq 1f;\n"
-                          "li %[ret], 0;\n"
-                          "1: ;\n"
+    __asm__ __volatile__ ("stwcx. %[val],0,%[ptr]\n"
+                          "\tbeq 1f\n"
+                          "\tli %[ret], 0\n"
+                          "1:"
                           : [ret] "=r" (ret)
                           : [ptr] "r" (&ptr->v), [val] "r" (val), "0" (ret)
                           : "cc", "memory");
