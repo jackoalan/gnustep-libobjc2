@@ -5,3 +5,4 @@ find_package(WiiStep REQUIRED)
 
 # Create targets and what-not down here
 add_wii_executable(objc_msgSend objc_msgSend.m)
+target_link_wii_dkppc_libraries(objc_msgSend db)

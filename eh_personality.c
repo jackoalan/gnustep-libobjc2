@@ -11,6 +11,7 @@
 #include <pthread.h>
 #endif
 
+#define DEBUG_EXCEPTIONS
 #ifndef DEBUG_EXCEPTIONS
 #define DEBUG_LOG(...)
 #else
