@@ -231,12 +231,13 @@ static inline void initAutorelease(void)
 		}
 	}
 }
-
+extern unsigned sleep(unsigned int);
 static inline id autorelease(id obj)
 {
-	//fprintf(stderr, "Autoreleasing %p\n", obj);
+	fprintf(stderr, "Autoreleasing %p\n", obj); sleep(1);
 	if (useARCAutoreleasePool)
 	{
+		fprintf(stderr, "ARCING!!\n"); sleep(1);
 		struct arc_tls *tls = getARCThreadData();
 		if (NULL != tls)
 		{
@@ -251,11 +252,13 @@ static inline id autorelease(id obj)
 			count++;
 			*pool->insert = obj;
 			pool->insert++;
+			fprintf(stderr, "REALLY ARCED\n"); sleep(1);
 			return obj;
 		}
 	}
 	if (objc_test_class_flag(classForObject(obj), objc_class_flag_fast_arc))
 	{
+		fprintf(stderr, "FASTING!!\n"); sleep(1);
 		initAutorelease();
 		if (0 != AutoreleaseAdd)
 		{
@@ -263,6 +266,7 @@ static inline id autorelease(id obj)
 		}
 		return obj;
 	}
+	fprintf(stderr, "OH NOES!!\n"); sleep(1);
 	return [obj autorelease];
 }
 

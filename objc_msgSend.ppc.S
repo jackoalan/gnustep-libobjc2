@@ -33,7 +33,7 @@
 
 // Simplified string logger
 .macro LOGst string, arg, time
-	//LOGStr \string, \arg, \time, r16, r17, r18, r19, r20, r21
+	LOGStr \string, \arg, \time, r16, r17, r18, r19, r20, r21
 .endm
 
 .macro MSGSEND receiver, sel
@@ -57,7 +57,7 @@
 	beq    1f
 
 	// Decided to use small int class
-	LOGSt SmallIntDbgStr, 0, 1
+	LOGSt SmallIntDbgStr, \receiver, 1
 
 	lis    r11, LSmallIntClass@ha
 	lwz    r11, LSmallIntClass@l(r11)              // Small Int class -> r4 if this is a small int
@@ -77,7 +77,7 @@
 	//lwz    r11, 0(r11) // ?????
 
 	cmplw  r11, r12                          // If dtable == &uninstalled_dtable
-	beq    5f                              // Do a slow lookup
+	b    5f                              // Do a slow lookup
 
 	//cmplwi r11, 0                          // Also test for `nil` dtable
 	//beq    5f
@@ -143,7 +143,7 @@
 	stw    r8,  24(r1)
 	stw    r9,  28(r1)
 	stw    r10,  32(r1)
-	//stw    \receiver, 36(r1)               // Additionally store macro-resolved receiver register
+	stw    \receiver, 36(r1)               // Additionally store macro-resolved receiver register
 
 
 	//push   {\receiver}                    // &self, _cmd in arguments
@@ -166,7 +166,7 @@
 	lwz    r8,  24(r1)
 	lwz    r9,  28(r1)
 	lwz    r10,  32(r1)
-	//lwz    \receiver, 36(r1)               // Additionally load macro-resolved receiver register
+	lwz    \receiver, 36(r1)               // Additionally load macro-resolved receiver register
 	addi   r1, r1, 40                      // Pop frame from stack
 	lwz    r0,  4(r1)                     // Get saved Link register
 	mtlr   r0                              // Restore Link register
@@ -199,7 +199,7 @@ STestStr:
 	.align  2
 
 SmallIntDbgStr:
-	.string "Decided to use Small Int Class\n"
+	.string "Decided to use Small Int Class: 0x%x\n"
 	.align  2
 
 WelcomeStr:

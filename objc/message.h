@@ -6,7 +6,7 @@
 #define _OBJC_MESSAGE_H_
 
 #if defined(__x86_64) || defined(__i386) || defined(__arm__) || \
-	defined(__mips_n64) || defined(__mips_n32)
+	defined(__mips_n64) || defined(__mips_n32) || defined(WIISTEP)
 /**
  * Standard message sending function.  This function must be cast to the
  * correct types for the function before use.  The first argument is the
@@ -55,7 +55,9 @@ void objc_msgSend_stret(id self, SEL _cmd, ...);
  * This version of the function is used for all messages that return floating
  * point values.
  */
+#ifndef WIISTEP
 long double objc_msgSend_fpret(id self, SEL _cmd, ...);
+#endif
 
 #endif
 

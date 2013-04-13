@@ -41,6 +41,7 @@ __attribute__((objc_root_class))
 }
 + foo
 {
+	//printf("%p == %p\n", TestCls, self);sleep(5);
 	assert(TestCls == self);
 	assert(strcmp("foo", sel_getName(_cmd)) == 0);
 	return (id)0x42;
@@ -68,13 +69,13 @@ __attribute__((objc_root_class))
 	
 	vasprintf(&s, str, ap);
 	va_end(ap);
-	printf("String: '%s'\n", s);
+	//printf("String: '%s'\n", s);
 	assert(strcmp(s, "Format string 42 42.000000\n") ==0);
 }
 + (void)initialize
 {
 	[self printf: "Format %s %d %f%c", "string", 42, 42.0, '\n'];
-	@throw self;
+	//@throw self;
 }
 + nothing { return 0; }
 @end
@@ -104,8 +105,9 @@ int main(void)
 	DCFlushRange(mem1_arena_at_init, ((mem1_arena_diff_after_objc_init>>5)<<5)+32);
 	printf("Obj-C on Wii initialised... Runtime Overhead: %u\n", mem1_arena_diff_after_objc_init-mem1_arena_diff_after_wii_init);
 	SLEEP();
-    
+	
 	TestCls = objc_getClass("Test");
+	/*
 	int exceptionThrown = 0;
 	@try {
 		objc_msgSend(TestCls, @selector(foo));
@@ -115,7 +117,7 @@ int main(void)
 		exceptionThrown = 1;
 	}
 	assert(exceptionThrown && "An exception was thrown");
-	/*
+	*/
 	assert((id)0x42 == objc_msgSend(TestCls, @selector(foo)));
 	objc_msgSend(TestCls, @selector(nothing));
 	objc_msgSend(TestCls, @selector(missing));
@@ -176,7 +178,7 @@ int main(void)
 	printf("Direct IMP call took %f seconds. \n", 
 		((double)c2 - (double)c1) / (double)CLOCKS_PER_SEC);
 #endif
-	 */
+	
 	printf("Finished\n");
 	sleep(5);
 	return 0;

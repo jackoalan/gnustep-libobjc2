@@ -78,8 +78,6 @@ __attribute__((unused)) static void objc_release_lock(void *x)
 {
 	mutex_t *lock = *(mutex_t**)x;
 	UNLOCK(lock);
-    //printf("Unlocked Mutex: %u\n", *lock);
-    //SLEEP();
 }
 /**
  * Acquires the lock and automatically releases it at the end of the current
@@ -88,7 +86,7 @@ __attribute__((unused)) static void objc_release_lock(void *x)
 #define LOCK_FOR_SCOPE(lock) \
 	__attribute__((cleanup(objc_release_lock)))\
 	__attribute__((unused)) mutex_t *lock_pointer = lock;\
-    LOCK(lock)
+	LOCK(lock)
 
 /**
  * The global runtime mutex.
