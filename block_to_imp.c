@@ -55,7 +55,7 @@ static struct wx_buffer alloc_buffer(size_t size)
 		unlink(tmpPattern);
 		ftruncate(fd, PAGE_SIZE);
 		void *w = malloc(PAGE_SIZE);
-        executeBuffer = w;
+		executeBuffer = w;
 		*((void**)w) = writeBuffer;
 		writeBuffer = w;
 		offset = sizeof(void*);
