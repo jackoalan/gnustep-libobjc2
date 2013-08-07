@@ -3,7 +3,7 @@
 #include <assert.h>
 #include <string.h>
 #include <stdarg.h>
-#include "objc/runtime.h"
+#include "../objc/runtime.h"
 
 #include <gccore.h>
 #include <unistd.h>
